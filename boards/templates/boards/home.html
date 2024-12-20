@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Trellolike</title>
+    <style>
+        body {
+            background-image: url('/static/images/bgr.webp');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            background-color: #f8f9fa;
+        }
+        .project-title {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Projects</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBoardModal">+ Add Project</button>
+        </div>
+        <div class="row">
+            {% for board in boards %}
+<div class="col-md-4 mb-4">
+    <div class="card position-relative" style="background-color: {{ board.color }}">
+        <!-- Кнопка настроек в правом верхнем углу -->
+        <button 
+            class="btn btn-outline-secondary position-absolute top-0 end-0 m-2" 
+            data-bs-toggle="modal" 
+            data-bs-target="#settingsModal{{ board.id }}">
+            ...
+        </button>
+        
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title project-title">{{ board.title }}</h5>
+            <p class="card-text">
+                Created: {{ board.created_at|date:"d M, Y" }}
+            </p>
+            <div class="mt-auto d-flex justify-content-between">
+                <a href="{% url 'board_detail' board.id %}" class="btn btn-outline-primary">View Project</a>
+                {% if not board.tasks.exists %} <!-- Проверка на отсутствие задач -->
+                <button 
+                    class="btn btn-danger ms-auto" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#deleteBoardModal{{ board.id }}">
+                    Delete
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- Modal for deleting a project -->
+            <div class="modal fade" id="deleteBoardModal{{ board.id }}" tabindex="-1" aria-labelledby="deleteBoardModalLabel{{ board.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteBoardModalLabel{{ board.id }}">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete the project "{{ board.title }}"? This action cannot be undone.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form method="post" action="{% url 'delete_board' board.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+				<!-- Modal for Настройка карточки -->
+				<div class="modal fade" id="settingsModal{{ board.id }}" tabindex="-1" aria-labelledby="settingsModalLabel{{ board.id }}" aria-hidden="true">
+				    <div class="modal-dialog">
+				        <div class="modal-content">
+				            <div class="modal-header">
+				                <h5 class="modal-title" id="settingsModalLabel{{ board.id }}">Настройка карточки</h5>
+				                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				            </div>
+															{% if board.id %}
+				           <form method="post" action="{% url 'update_board' board.id %}">
+				                {% csrf_token %}
+				                <div class="modal-body">
+				                    <!-- Изменение названия -->
+				                    <div class="mb-3">
+				                        <label for="boardTitle{{ board.id }}" class="form-label">Название карточки</label>
+				                        <input type="text" class="form-control" id="boardTitle{{ board.id }}" name="title" value="{{ board.title }}" required>
+				                    </div>
+				                    <!-- Изменение цвета -->
+				                    <div class="mb-3">
+				                        <label for="boardColor{{ board.id }}" class="form-label">Цвет карточки</label>
+				                        <input type="color" class="form-control form-control-color" id="boardColor{{ board.id }}" name="color" value="{{ board.color }}">
+				                    </div>
+				                </div>
+				                <div class="modal-footer">
+				                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+				                    <button type="submit" class="btn btn-primary">Сохранить</button>
+				                </div>
+				            </form>
+																{% else %}
+																<p>Ошибка: доска не имеет идентификатора.</p>
+																{% endif %}
+				        </div>
+				    </div>
+				</div>
+
+    <!-- Modal for adding a new project -->
+    <div class="modal fade" id="createBoardModal" tabindex="-1" aria-labelledby="createBoardModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createBoardModalLabel">Add New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'create_board' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="projectTitle" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="projectTitle" name="title" placeholder="Enter project name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error message -->
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+</body>
+</html>

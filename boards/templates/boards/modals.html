@@ -1,0 +1,116 @@
+<!-- Модальное окно для создания новой задачи -->
+    <div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTaskModalLabel">Создать новую задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'create_task' board.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="taskTitle" class="form-label">Название задачи</label>
+                            <input type="text" class="form-control" id="taskTitle" name="title" maxlength="20" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskDescription" class="form-label">Описание</label>
+                            <textarea class="form-control" id="taskDescription" name="description" rows="3" maxlength="2000"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskExpiredDate" class="form-label">Дата завершения</label>
+                            <input type="date" class="form-control" id="taskExpiredDate" name="expired_date" required>
+                        </div>
+                        <!-- Размещение Тега и Статуса в одну строку -->
+																				    <div class="row">
+																				        <div class="col-md-6">
+																				            <label for="taskTag" class="form-label">Тег</label>
+																				            <select class="form-select" id="taskTag" name="tag">
+																				                <option value="">Без тега</option>
+																				                {% for tag in tags %}
+																				                <option value="{{ tag.id }}" {% if task.tag and task.tag.id == tag.id %}selected{% endif %}>
+																				                    {{ tag.name }}
+																				                </option>
+																				                {% endfor %}
+																				            </select>
+																				        </div>
+																				        <div class="col-md-6">
+																				            <label for="taskStatus" class="form-label">Статус</label>
+																				            <select class="form-select" id="taskStatus" name="status" required>
+																				                <option value="todo" {% if task.status == 'todo' %}selected{% endif %}>Сделать</option>
+																				                <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>В работе</option>
+																				                <option value="done" {% if task.status == 'done' %}selected{% endif %}>Готово</option>
+																				            </select>
+																				        </div>
+																				    </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Создать задачу</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна для задач -->
+				{% for task in board.tasks.all %}
+				<div class="modal fade" id="taskModal{{ task.id }}" tabindex="-1" aria-labelledby="taskModalLabel{{ task.id }}" aria-hidden="true">
+				    <div class="modal-dialog">
+				        <div class="modal-content">
+				            <form method="post" action="{% url 'update_task' task.id %}">
+				                {% csrf_token %}
+				                <div class="modal-header">
+				                    <h5 class="modal-title" id="taskModalLabel{{ task.id }}">Редактировать задачу</h5>
+				                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				                </div>
+				                <div class="modal-body">
+				                    <!-- Поле для изменения названия задачи -->
+				                    <div class="mb-3">
+				                        <label for="taskTitle{{ task.id }}" class="form-label">Название задачи</label>
+				                        <input type="text" class="form-control" id="taskTitle{{ task.id }}" name="title" maxlength="20" value="{{ task.title }}" required>
+				                    </div>
+				                    <!-- Поле для изменения описания -->
+				                    <div class="mb-3">
+				                        <label for="taskDescription{{ task.id }}" class="form-label">Описание</label>
+				                        <textarea class="form-control" id="taskDescription{{ task.id }}" name="description" rows="3" maxlength="2000">{{ task.description }}</textarea>
+				                    </div>
+				                    <!-- Поле для изменения даты завершения -->
+				                    <div class="mb-3">
+				                        <label for="taskExpiredDate{{ task.id }}" class="form-label">Дата завершения</label>
+                            <input type="date" class="form-control" id="taskExpiredDate{{ task.id }}" name="expired_date" value="{{ task.expired_date|date:'Y-m-d' }}" required>
+				                       
+				                    </div>
+				                    <!-- Размещение Тега и Статуса в одну строку -->
+																				    <div class="row">
+																				        <div class="col-md-6">
+																				            <label for="taskTag" class="form-label">Тег</label>
+																				            <select class="form-select" id="taskTag" name="tag">
+																				                <option value="">Без тега</option>
+																				                {% for tag in tags %}
+																				                <option value="{{ tag.id }}" {% if task.tag and task.tag.id == tag.id %}selected{% endif %}>
+																				                    {{ tag.name }}
+																				                </option>
+																				                {% endfor %}
+																				            </select>
+																				        </div>
+																				        <div class="col-md-6">
+																				            <label for="taskStatus" class="form-label">Статус</label>
+																				            <select class="form-select" id="taskStatus" name="status" required>
+																				                <option value="todo" {% if task.status == 'todo' %}selected{% endif %}>Сделать</option>
+																				                <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>В работе</option>
+																				                <option value="done" {% if task.status == 'done' %}selected{% endif %}>Готово</option>
+																				            </select>
+																				        </div>
+																				    </div>
+				                </div>
+				                <div class="modal-footer">
+																								<button type="button" class="btn btn-danger me-auto" onclick="deleteTask({{ task.id }})">Удалить</button>
+				                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+				                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+				                </div>
+				            </form>
+				        </div>
+				    </div>
+				</div>
+				{% endfor %}

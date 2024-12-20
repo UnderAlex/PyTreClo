@@ -1,0 +1,68 @@
+<!-- Контейнер для списков задач -->
+        <div class="board-container">
+            <!-- "Сделать" -->
+            <div class="card task-column">
+                <div class="card-header bg-warning text-white">Сделать</div>
+                <div class="card-body">
+                    <ul class="list-group" id="todo">
+                        {% for task in tasks_todo %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-task-id="{{ task.id }}">
+								                    <!-- Цвет тега -->
+								                    {% if task.tag %}
+								                    <div class="tag-marker" style="background-color: {{ task.tag.color }};"></div>
+								                    {% endif %}
+                    								<!-- Название задачи -->
+                            <span>{{ task.title }}</span>
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#taskModal{{ task.id }}">...</button>
+                        </li>
+                        {% empty %}
+                        <p class="text-muted">Нет задач.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- "В работе" -->
+            <div class="card task-column">
+                <div class="card-header bg-primary text-white">В работе</div>
+                <div class="card-body">
+                    <ul class="list-group" id="in_progress">
+                        {% for task in tasks_in_progress %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-task-id="{{ task.id }}">
+								                    <!-- Цвет тега -->
+								                    {% if task.tag %}
+								                    <div class="tag-marker" style="background-color: {{ task.tag.color }};"></div>
+								                    {% endif %}
+                    								<!-- Название задачи -->
+                            <span>{{ task.title }}</span>
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#taskModal{{ task.id }}">...</button>
+                        </li>
+                        {% empty %}
+                        <p class="text-muted">Нет задач.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- "Готово" -->
+            <div class="card task-column">
+                <div class="card-header bg-success text-white">Готово</div>
+                <div class="card-body">
+                    <ul class="list-group" id="done">
+                        {% for task in tasks_done %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-task-id="{{ task.id }}">
+								                    <!-- Цвет тега -->
+								                    {% if task.tag %}
+								                    <div class="tag-marker" style="background-color: {{ task.tag.color }};"></div>
+								                    {% endif %}
+                    								<!-- Название задачи -->
+                            <span>{{ task.title }}</span>
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#taskModal{{ task.id }}">...</button>
+                        </li>
+                        {% empty %}
+                        <p class="text-muted">Нет задач.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
